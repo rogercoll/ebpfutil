@@ -43,6 +43,7 @@ func progGetNextId(prev uint32) (uint32, error) {
 	return bgi.NextID, nil
 }
 
+// ProgramsID returns the ID of the attached BPF programs running in the host
 func ProgramsID() ([]uint32, error) {
 	//TODO: check if kernel > 3.14
 	var progs []uint32

@@ -58,6 +58,7 @@ type bpfGetInfoByFD struct {
 	Info    unsafe.Pointer
 }
 
+// GetInfoByFD returns the BPF program information given its file descriptor
 func GetInfoByFD(fd uint32) (*BPFProgInfo, error) {
 	var info BPFProgInfo
 	attr := bpfGetInfoByFD{
