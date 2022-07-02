@@ -1,5 +1,7 @@
 # eBPFutil
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/rogercoll/ebpfutil.svg)](https://pkg.go.dev/github.com/rogercoll/ebpfutil)
+
 Retrieves basic information of the pinned BPF programs running in the host. This pacakge **cannot** be used to load, attach, link or unload BPF programs, it can only be used to gather BPF stats.
 
 ## Usage
