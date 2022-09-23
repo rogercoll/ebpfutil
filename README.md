@@ -35,16 +35,25 @@ package main
 import (
 	"fmt"
 	"log"
+
 	"github.com/rogercoll/ebpfutil"
 )
 
 func main() {
-	stats, err := ebpfutil.GetAllStats()
+	progs, err := ebpfutil.ProgramsID()
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, stat := range stats {
-		fmt.Printf("Program name: %s, Owner ID: %d\n", string(stat.Info.Name[:]), stat.Info.CreatedByUid)
+	for _, progID := range progs {
+		fd, err := ebpfutil.GetProgFileDescriptor(progID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		info, err := ebpfutil.GetInfoByFD(fd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Program ID: %v, FD: %v, CreatedBy: %v, Name: %v\n", progID, fd, info.CreatedByUid, string(info.Name[:]))
 	}
 }
 ```
