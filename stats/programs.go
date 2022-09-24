@@ -1,9 +1,10 @@
-package ebpfutil
+package stats
 
 import (
 	"fmt"
 	"sync"
 
+	"github.com/rogercoll/ebpfutil"
 	"go.uber.org/multierr"
 )
 
@@ -13,7 +14,7 @@ type BPFProgram struct {
 	// File Descriptor of the BPF program
 	FD uint32
 	// Available information: https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h#L5840
-	Info *BPFProgInfo
+	Info *ebpfutil.BPFProgInfo
 }
 
 type result struct {
@@ -21,9 +22,9 @@ type result struct {
 	err     error
 }
 
-// GetAllStats returns an array of the attached BPF programs and its avaialble information
-func GetAllStats() ([]BPFProgram, error) {
-	progs, err := ProgramsID()
+// BPFPrograms returns an array of the attached BPF programs and its avaialble information
+func BPFPrograms() ([]BPFProgram, error) {
+	progs, err := ebpfutil.ProgramsID()
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +36,13 @@ func GetAllStats() ([]BPFProgram, error) {
 		go func(id uint32) {
 			defer wg.Done()
 			program := BPFProgram{ID: id}
-			fd, err := GetProgFileDescriptor(id)
+			fd, err := ebpfutil.GetProgFileDescriptor(id)
 			if err != nil {
 				results <- result{program, err}
 				return
 			}
 			program.FD = fd
-			info, err := GetInfoByFD(fd)
+			info, err := ebpfutil.GetProgInfoByFD(fd)
 			if err != nil {
 				results <- result{program, err}
 				return

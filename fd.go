@@ -14,14 +14,14 @@ type bpfGetFDByID struct {
 
 // GetProgramFileDescriptor return the file descirptor of a given BPF program ID
 // https://elixir.bootlin.com/linux/latest/source/tools/lib/bpf/bpf.c#L1090
-func GetProgFileDescriptor(id uint32) (uint32, error) {
+func getFileDescriptor(structure uintptr, id uint32) (uint32, error) {
 	attr := bpfGetFDByID{
 		id: id,
 	}
 
 	ret, _, err := unix.Syscall(
 		unix.SYS_BPF,
-		unix.BPF_PROG_GET_FD_BY_ID,
+		structure,
 		uintptr(unsafe.Pointer(&attr)),
 		unsafe.Sizeof(attr),
 	)
@@ -31,4 +31,14 @@ func GetProgFileDescriptor(id uint32) (uint32, error) {
 	}
 
 	return uint32(ret), nil
+}
+
+// GetProgramFileDescriptor return the file descirptor of a given BPF program ID
+func GetProgFileDescriptor(id uint32) (uint32, error) {
+	return getFileDescriptor(unix.BPF_PROG_GET_FD_BY_ID, id)
+}
+
+// GetMapFileDescriptor return the file descirptor of a given BPF map ID
+func GetMapFileDescriptor(id uint32) (uint32, error) {
+	return getFileDescriptor(unix.BPF_MAP_GET_FD_BY_ID, id)
 }

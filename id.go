@@ -27,12 +27,12 @@ type bpfGetId struct {
 	OpenFlags uint32
 }
 
-func progGetNextId(prev uint32) (uint32, error) {
+func getNextId(structure uintptr, prev uint32) (uint32, error) {
 	bgi := bpfGetId{ID: prev}
 
 	_, _, err := unix.Syscall(
 		unix.SYS_BPF,
-		unix.BPF_PROG_GET_NEXT_ID,
+		structure,
 		uintptr(unsafe.Pointer(&bgi)),
 		unsafe.Sizeof(bgi),
 	)
@@ -43,13 +43,12 @@ func progGetNextId(prev uint32) (uint32, error) {
 	return bgi.NextID, nil
 }
 
-// ProgramsID returns the ID of the attached BPF programs running in the host
-func ProgramsID() ([]uint32, error) {
+func getIDs(structure uintptr) ([]uint32, error) {
 	//TODO: check if kernel > 3.14
 	var progs []uint32
 	var prev uint32 // inits to 0
 	for {
-		id, err := progGetNextId(prev)
+		id, err := getNextId(structure, prev)
 		if err != nil {
 			if errors.Is(err, unix.ENOENT) {
 				// all BPF programms scanned
@@ -63,4 +62,14 @@ func ProgramsID() ([]uint32, error) {
 	}
 
 	return progs, nil
+}
+
+// ProgramsID returns the ID of the attached BPF programs running in the host
+func ProgramsID() ([]uint32, error) {
+	return getIDs(unix.BPF_PROG_GET_NEXT_ID)
+}
+
+// MapsID returns the ID of the attached BPF programs running in the host
+func MapsID() ([]uint32, error) {
+	return getIDs(unix.BPF_MAP_GET_NEXT_ID)
 }
