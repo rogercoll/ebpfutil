@@ -2,58 +2,29 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/rogercoll/ebpfutil.svg)](https://pkg.go.dev/github.com/rogercoll/ebpfutil)
 
-Retrieves basic information of the pinned BPF programs running in the host. This pacakge **cannot** be used to load, attach, link or unload BPF programs, it can only be used to gather BPF stats.
+Retrieves basic information of the pinned BPF programs and maps running in the host. This package **cannot** be used to load, attach, link or unload BPF programs, it can only be used to gather BPF stats.
+
+## Package Features
+
+### BPF Programs
+
+`stats.BPFPrograms()` -> Returns an array of all the available BPF programs loaded in
+the system as a [BPFProgram structure](https://github.com/rogercoll/ebpfutil/blob/main/stats/programs.go#L11) which contains the ID, FD and
+[BPFProgInfo](https://github.com/rogercoll/ebpfutil/blob/8b5366a7bf3d0c9b142849a4b6e2e62d23d243b1/program.go#L10) of the corresponding program. See [examples/programs/main.go](./examples/programs/main.go)
+
+### BPF Maps
+
+`stats.BPFMaps()` -> Returns an array of all the available BPF maps in
+the system as a [BPFMap structure](https://github.com/rogercoll/ebpfutil/blob/main/stats/maps.go#L11) which contains the ID, FD and
+[BPFMapInfo](https://github.com/rogercoll/ebpfutil/blob/8b5366a7bf3d0c9b142849a4b6e2e62d23d243b1/map.go#L6) of the corresponding map. See [examples/maps/main.go](./examples/maps/main.go)
+
+
+For additional exported functionalities you check the [public documentation](https://pkg.go.dev/github.com/rogercoll/ebpfutil).
 
 ## Usage
 
-For example, to monitor the total number of BPF programs attached to the system:
+Import it into your Go program and use any of the exported functions:
 
-```Go
-package main
-
-import (
-	"fmt"
-	"log"
-	"github.com/rogercoll/ebpfutil"
-)
-
-func main() {
-	progs, err := ebpfutil.ProgramsID()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Total number of BPF programs: %d\n", len(progs))
-}
-```
-
-The whole BPF programs information can be gather with `GetAllStats()`, the returned information contains the same fields as the internal [kernel structure](https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h#L5840) and the file descriptor. For example, it contains the program's name, owner's ID, etc:
-
-
-```Go
-package main
-
-import (
-	"fmt"
-	"log"
-
-	"github.com/rogercoll/ebpfutil"
-)
-
-func main() {
-	progs, err := ebpfutil.ProgramsID()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, progID := range progs {
-		fd, err := ebpfutil.GetProgFileDescriptor(progID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		info, err := ebpfutil.GetInfoByFD(fd)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Program ID: %v, FD: %v, CreatedBy: %v, Name: %v\n", progID, fd, info.CreatedByUid, string(info.Name[:]))
-	}
-}
+```bash
+go get github.com/rogercoll/ebpfutil
 ```
